@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+
+  body {
+    @apply bg-dark-950 text-slate-100 font-sans antialiased selection:bg-brand-500/30 selection:text-brand-200 min-h-screen;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.06) 0px, transparent 50%);
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.6);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(51, 65, 85, 0.7);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.5);
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-dark-900/75 backdrop-blur-xl border border-slate-800/80 shadow-glass rounded-2xl;
+  }
+  
+  .glass-card-interactive {
+    @apply bg-dark-850/60 hover:bg-dark-800/80 backdrop-blur-lg border border-slate-800/70 hover:border-brand-500/40 transition-all duration-200 rounded-xl shadow-lg;
+  }
+
+  .glow-border-brand {
+    box-shadow: 0 0 15px -3px rgba(99, 102, 241, 0.3), inset 0 0 15px -3px rgba(99, 102, 241, 0.1);
+  }
+
+  .glow-border-emerald {
+    box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.3), inset 0 0 15px -3px rgba(16, 185, 129, 0.1);
+  }
+
+  .gradient-text-brand {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-300 via-indigo-200 to-accent-violet;
+  }
+
+  .gradient-text-emerald {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-teal-100;
+  }
+}

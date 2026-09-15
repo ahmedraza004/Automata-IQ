@@ -1,0 +1,122 @@
+{
+  "name": "AutomataIQ - Recruitment Screening & Candidate Scoring",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "recruitment-webhook",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Resume Ingestion Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/simulation/recruitment/screen",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {}
+      },
+      "id": "2",
+      "name": "AI Resume Parsing & Match Matrix",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.candidate_score }}",
+              "operation": "largerEqual",
+              "value2": 85
+            }
+          ]
+        }
+      },
+      "id": "3",
+      "name": "Score >= 85 (Top Match)?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/integrations/slack/post-candidate-shortlist",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "4",
+      "name": "Post to #hiring-leads Slack Channel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [920, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/integrations/jira/create-candidate-task",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "5",
+      "name": "Log to Talent Pipeline Pool",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [920, 420]
+    }
+  ],
+  "connections": {
+    "Resume Ingestion Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Resume Parsing & Match Matrix",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Resume Parsing & Match Matrix": {
+      "main": [
+        [
+          {
+            "node": "Score >= 85 (Top Match)?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score >= 85 (Top Match)?": {
+      "main": [
+        [
+          {
+            "node": "Post to #hiring-leads Slack Channel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log to Talent Pipeline Pool",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

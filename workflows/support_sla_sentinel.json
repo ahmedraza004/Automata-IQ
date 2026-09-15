@@ -1,0 +1,122 @@
+{
+  "name": "AutomataIQ - Support SLA Sentinel & Smart Triage",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-ticket-webhook",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Incoming Support Ticket Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/simulation/support/triage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {}
+      },
+      "id": "2",
+      "name": "AI Sentiment & Urgency Triage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.priority }}",
+              "operation": "equal",
+              "value2": "critical"
+            }
+          ]
+        }
+      },
+      "id": "3",
+      "name": "Is Critical Priority?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/integrations/jira/create-urgent-ticket",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "4",
+      "name": "Create Urgent Jira SLA Incident",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [920, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/integrations/email/send-auto-reply",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "5",
+      "name": "Dispatch Verified AI Auto-Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [920, 420]
+    }
+  ],
+  "connections": {
+    "Incoming Support Ticket Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Sentiment & Urgency Triage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Sentiment & Urgency Triage": {
+      "main": [
+        [
+          {
+            "node": "Is Critical Priority?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Critical Priority?": {
+      "main": [
+        [
+          {
+            "node": "Create Urgent Jira SLA Incident",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dispatch Verified AI Auto-Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

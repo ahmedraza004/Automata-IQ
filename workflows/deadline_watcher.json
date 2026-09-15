@@ -1,0 +1,70 @@
+{
+  "name": "AutomataIQ - Global Deadline Watcher & Sentinel",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "1",
+      "name": "15-Min Cron Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/simulation/sentinel/scan-deadlines",
+        "options": {}
+      },
+      "id": "2",
+      "name": "Trigger Sentinel Deadline Scan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/escalations/process-sla-breaches",
+        "options": {}
+      },
+      "id": "3",
+      "name": "Auto-Escalate SLA Breaches",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "15-Min Cron Trigger": {
+      "main": [
+        [
+          {
+            "node": "Trigger Sentinel Deadline Scan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Sentinel Deadline Scan": {
+      "main": [
+        [
+          {
+            "node": "Auto-Escalate SLA Breaches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
